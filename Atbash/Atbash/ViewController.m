@@ -13,7 +13,9 @@
 @property (weak, nonatomic) IBOutlet UITextField *stringTextField;
 @property (weak, nonatomic) IBOutlet UILabel *outputLabel;
 
-- (NSString *)performAtbash:(NSString *)stringToConvert;
+- (NSString *)encrypt:(NSString *)stringToEncrypt;
+- (NSString *)decrypt:(NSString *)stringToDecrypt;
+- (void)displayErrorWithTitle:(NSString *)title andMessage:(NSString *)message;
 
 @end
 
@@ -32,12 +34,12 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (NSString *)performAtbash:(NSString *)stringToConvert {
+- (NSString *)encrypt:(NSString *)stringToEncrypt {
     NSMutableString *newString = [[NSMutableString alloc] init];
     NSString *forward = @"abcdefghijklmnopqrstuvwxyz";
     NSString *reverse = @"zyxwvutsrqponmlkjihgfedcba";
     NSCharacterSet *letterSet = [NSCharacterSet characterSetWithCharactersInString:forward];
-    NSArray *wordsArray = [stringToConvert componentsSeparatedByString:@" "];
+    NSArray *wordsArray = [stringToEncrypt componentsSeparatedByString:@" "];
     NSRange rangeOfLetter;
     NSString *letter = @"";
     
@@ -61,17 +63,60 @@
     return [newString copy];
 }
 
+- (NSString *)decrypt:(NSString *)stringToDecrypt {
+    NSMutableString *newString = [[NSMutableString alloc] init];
+    NSString *forward = @"abcdefghijklmnopqrstuvwxyz";
+    NSString *reverse = @"zyxwvutsrqponmlkjihgfedcba";
+    NSCharacterSet *letterSet = [NSCharacterSet characterSetWithCharactersInString:forward];
+    NSArray *wordsArray = [stringToDecrypt componentsSeparatedByString:@" "];
+    NSRange rangeOfLetter;
+    NSString *letter = @"";
+    
+    for (NSString *word in wordsArray) {
+        int index = 0;
+        while (index < word.length) {
+            letter = [NSString stringWithFormat:@"%c", [word characterAtIndex:index]];
+            rangeOfLetter = [reverse rangeOfString:letter];
+            if ([letter rangeOfCharacterFromSet:[letterSet invertedSet]].location == NSNotFound) {
+                [newString setString:[newString stringByAppendingString:[NSString stringWithFormat:@"%c", (char)[forward characterAtIndex:rangeOfLetter.location]]]];
+            } else {
+                [newString setString:[newString stringByAppendingString:letter]];
+            }
+            index += 1;
+        }
+        if (wordsArray.count > 1) {
+            [newString setString:[newString stringByAppendingString:@" "]];
+        }
+    }
+    
+    return [newString copy];
+}
+
 #pragma mark - Button Actions 
 
-- (IBAction)atbashAction:(UIButton *)sender {
+- (IBAction)encryptAction:(UIButton *)sender {
     if (![self.stringTextField.text isEqualToString:@""]) {
-        self.outputLabel.text = [self performAtbash:self.stringTextField.text];
+        self.outputLabel.text = [self encrypt:self.stringTextField.text];
     } else {
-        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Error" message:@"Must enter string to convert" preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *okButton = [UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:nil];
-        [alertController addAction:okButton];
-        [self presentViewController:alertController animated:YES completion:nil];
+        [self displayErrorWithTitle:@"Error" andMessage:@"Must enter string to encrypt"];
     }
+}
+
+- (IBAction)decryptAction:(UIButton *)sender {
+    if (![self.stringTextField.text isEqualToString:@""]) {
+        self.outputLabel.text = [self decrypt:self.stringTextField.text];
+    } else {
+        [self displayErrorWithTitle:@"Error" andMessage:@"Must enter string to decrypt"];
+    }
+}
+
+#pragma mark - Error Handling
+
+- (void)displayErrorWithTitle:(NSString *)title andMessage:(NSString *)message {
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction *okButton = [UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:nil];
+    [alertController addAction:okButton];
+    [self presentViewController:alertController animated:YES completion:nil];
 }
 
 @end
