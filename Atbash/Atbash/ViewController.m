@@ -12,6 +12,13 @@
 
 @property (weak, nonatomic) IBOutlet UITextField *stringTextField;
 @property (weak, nonatomic) IBOutlet UILabel *outputLabel;
+@property (strong, nonatomic) NSString *lowerCase;
+@property (strong, nonatomic) NSString *upperCase;
+@property (strong, nonatomic) NSString *lowerCaseReverse;
+@property (strong, nonatomic) NSString *upperCaseReverse;
+@property (strong, nonatomic) NSCharacterSet *lowerCaseSet;
+@property (strong, nonatomic) NSCharacterSet *upperCaseSet;
+@property (weak, nonatomic) NSString *letter;
 
 - (NSString *)encrypt:(NSString *)stringToEncrypt;
 - (NSString *)decrypt:(NSString *)stringToDecrypt;
@@ -25,6 +32,14 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
+    self.lowerCase = @"abcdefghijklmnopqrstuvwxyz";
+    self.upperCase = @"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    self.lowerCaseReverse = @"zyxwvutsrqponmlkjihgfedcba";
+    self.upperCaseReverse = @"ZYXWVUTSRQPONMLKJIHGFEDCBA";
+    self.lowerCaseSet = [NSCharacterSet characterSetWithCharactersInString:self.lowerCase];
+    self.upperCaseSet = [NSCharacterSet characterSetWithCharactersInString:self.upperCase];
+    self.letter = @"";
+    
     self.outputLabel.text = @"";
     [self.stringTextField becomeFirstResponder];
 }
@@ -36,9 +51,6 @@
 
 - (NSString *)encrypt:(NSString *)stringToEncrypt {
     NSMutableString *newString = [[NSMutableString alloc] init];
-    NSString *forward = @"abcdefghijklmnopqrstuvwxyz";
-    NSString *reverse = @"zyxwvutsrqponmlkjihgfedcba";
-    NSCharacterSet *letterSet = [NSCharacterSet characterSetWithCharactersInString:forward];
     NSArray *wordsArray = [stringToEncrypt componentsSeparatedByString:@" "];
     NSRange rangeOfLetter;
     NSString *letter = @"";
@@ -47,14 +59,20 @@
         int index = 0;
         while (index < word.length) {
             letter = [NSString stringWithFormat:@"%c", [word characterAtIndex:index]];
-            rangeOfLetter = [forward rangeOfString:letter];
-            if ([letter rangeOfCharacterFromSet:[letterSet invertedSet]].location == NSNotFound) {
-                [newString setString:[newString stringByAppendingString:[NSString stringWithFormat:@"%c", (char)[reverse characterAtIndex:rangeOfLetter.location]]]];
+            if ([letter rangeOfCharacterFromSet:[self.lowerCaseSet invertedSet]].location == NSNotFound) {
+                rangeOfLetter = [self.lowerCase rangeOfString:letter];
+                [newString setString:[newString stringByAppendingString:[NSString stringWithFormat:@"%c", (char)[self.lowerCaseReverse characterAtIndex:rangeOfLetter.location]]]];
+                
+            } else if ([letter rangeOfCharacterFromSet:[self.upperCaseSet invertedSet]].location == NSNotFound) {
+                rangeOfLetter = [self.upperCase rangeOfString:letter];
+                [newString setString:[newString stringByAppendingString:[NSString stringWithFormat:@"%c", (char)[self.upperCaseReverse characterAtIndex:rangeOfLetter.location]]]];
+                
             } else {
                 [newString setString:[newString stringByAppendingString:letter]];
             }
             index += 1;
         }
+        
         if (wordsArray.count > 1) {
             [newString setString:[newString stringByAppendingString:@" "]];
         }
@@ -65,9 +83,6 @@
 
 - (NSString *)decrypt:(NSString *)stringToDecrypt {
     NSMutableString *newString = [[NSMutableString alloc] init];
-    NSString *forward = @"abcdefghijklmnopqrstuvwxyz";
-    NSString *reverse = @"zyxwvutsrqponmlkjihgfedcba";
-    NSCharacterSet *letterSet = [NSCharacterSet characterSetWithCharactersInString:forward];
     NSArray *wordsArray = [stringToDecrypt componentsSeparatedByString:@" "];
     NSRange rangeOfLetter;
     NSString *letter = @"";
@@ -76,14 +91,20 @@
         int index = 0;
         while (index < word.length) {
             letter = [NSString stringWithFormat:@"%c", [word characterAtIndex:index]];
-            rangeOfLetter = [reverse rangeOfString:letter];
-            if ([letter rangeOfCharacterFromSet:[letterSet invertedSet]].location == NSNotFound) {
-                [newString setString:[newString stringByAppendingString:[NSString stringWithFormat:@"%c", (char)[forward characterAtIndex:rangeOfLetter.location]]]];
+            if ([letter rangeOfCharacterFromSet:[self.lowerCaseSet invertedSet]].location == NSNotFound) {
+                rangeOfLetter = [self.lowerCaseReverse rangeOfString:letter];
+                [newString setString:[newString stringByAppendingString:[NSString stringWithFormat:@"%c", (char)[self.lowerCase characterAtIndex:rangeOfLetter.location]]]];
+                
+            } else if ([letter rangeOfCharacterFromSet:[self.upperCaseSet invertedSet]].location == NSNotFound) {
+                rangeOfLetter = [self.upperCaseReverse rangeOfString:letter];
+                [newString setString:[newString stringByAppendingString:[NSString stringWithFormat:@"%c", (char)[self.upperCase characterAtIndex:rangeOfLetter.location]]]];
+                
             } else {
                 [newString setString:[newString stringByAppendingString:letter]];
             }
             index += 1;
         }
+        
         if (wordsArray.count > 1) {
             [newString setString:[newString stringByAppendingString:@" "]];
         }
