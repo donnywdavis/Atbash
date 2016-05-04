@@ -8,7 +8,7 @@
 
 #import "ViewController.h"
 
-@interface ViewController () <UITextFieldDelegate>
+@interface ViewController ()
 
 @property (weak, nonatomic) IBOutlet UITextField *stringTextField;
 @property (weak, nonatomic) IBOutlet UILabel *outputLabel;
@@ -72,12 +72,6 @@
         [alertController addAction:okButton];
         [self presentViewController:alertController animated:YES completion:nil];
     }
-}
-
-#pragma mark - Text Field Delegates
-
-- (void)textFieldDidBeginEditing:(UITextField *)textField {
-    self.outputLabel.text = @"";
 }
 
 @end
